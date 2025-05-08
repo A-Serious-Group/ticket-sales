@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: tickets-postgres
+    image: postgres:latest
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    networks:
+     - tickets-network
+  pgadmin:
+    container_name: tickets-pgadmin
+    image: dpage/pgadmin4:latest
+    ports:
+      - "9091:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=nathan@tickets.com.br
+      - PGADMIN_DEFAULT_PASSWORD=root
+    networks:
+      - tickets-network
+    depends_on:
+      - postgres
+  # api:
+  #   container_name: tickets-api
+  #   build:
+  #     context: ./api
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./api:/usr/src/app
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - tickets-network
+  # front:
+  #   container_name: tickets-front
+  #   build:
+  #     context: ./front
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - tickets-network
+  #   volumes:
+  #     - ./front:/app
+networks:
+  tickets-network:
+    name: tickets-network
