@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult, DeleteResult } from 'typeorm';
+import { Repository, UpdateResult, DeleteResult, ILike } from 'typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
@@ -15,7 +15,7 @@ export class EventService {
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
     try {
-      const { name, limit, price, description } = createEventDto;
+      const { name, limit, price, description, image_url } = createEventDto;
   
       if (!limit || limit <= 0) {
         throw new HttpException(
@@ -36,6 +36,7 @@ export class EventService {
         limit,
         price,
         description,
+        image_url
       });
   
       return await this.eventRepository.save(event);
@@ -53,6 +54,14 @@ export class EventService {
 
   async findAll(): Promise<Event[]> {
     return await this.eventRepository.find();
+  }
+
+  async searchByName(name: string): Promise<Event[]> {
+    return this.eventRepository.find({
+      where: {
+        name: ILike(`%${name}%`),
+      },
+    });
   }
 
   findOne(id: number): Promise<Event> {

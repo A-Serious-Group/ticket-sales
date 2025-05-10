@@ -3,4 +3,5 @@ export class CreateEventDto {
     description: string
     limit: number
     price: number
+    image_url: string
 }

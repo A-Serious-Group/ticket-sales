@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult, DeleteResult } from 'typeorm';
+import { Repository, UpdateResult, DeleteResult, In } from 'typeorm';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { Ticket } from './entities/ticket.entity';
@@ -17,7 +17,6 @@ export class TicketService {
 
   async create(createTicketDto: CreateTicketDto): Promise<Ticket[]> {
     try {
-
       const { event_id, amount } = createTicketDto;
       
       if (!amount || amount <= 0) {
@@ -26,42 +25,46 @@ export class TicketService {
           HttpStatus.BAD_REQUEST
         );
       }
-
+  
       const event = await this.eventService.findOne(event_id);
       if (!event) {
         throw new HttpException('Evento não encontrado', HttpStatus.NOT_FOUND);
       }
-
+  
       if (event.limit < amount) {
         throw new HttpException(
           `A quantidade máxima de ingressos disponíveis para venda é ${event.limit}`, 
           HttpStatus.BAD_REQUEST
         );
       }
-
+  
       const createdTickets: Ticket[] = [];
-
+  
       for (let index = 0; index < amount; index++) {
         const ticket = new Ticket();
         ticket.event_id = event_id;
         ticket.code = 'TICKET_CODE_' + (event.limit - index);
-
+  
         const saved = await this.ticketRepository.save(ticket);
         createdTickets.push(saved);
       }
-
+  
       await this.eventService.update(event_id, {
         limit: event.limit - amount,
       });
-
-      return createdTickets;
-
-
+  
+      const ticketsWithEvent = await this.ticketRepository.find({
+        where: { id: In(createdTickets.map(ticket => ticket.id)) },
+        relations: ['event'],
+      });
+  
+      return ticketsWithEvent;
+  
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
-    
+  
       throw new HttpException({
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         error: error.message || 'Internal server error',
@@ -70,7 +73,9 @@ export class TicketService {
   }
 
   async findAll(): Promise<Ticket[]> {
-    return await this.ticketRepository.find();
+    return await this.ticketRepository.find({
+      relations: ['event'], 
+    });
   }
 
   findOne(id: number): Promise<Ticket> {

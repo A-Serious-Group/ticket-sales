@@ -24,6 +24,9 @@ export class Event {
   @Column()
   description: string;
 
+  @Column({ nullable: true })
+  image_url: string;
+
   @Column({ type: 'float' })
   price: number;
 

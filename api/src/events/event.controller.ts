@@ -17,6 +17,11 @@ export class EventController {
     return this.eventService.findAll();
   }
 
+  @Get('search/:name')
+  searchByName(@Param('name') name: string) {
+    return this.eventService.searchByName(name);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.eventService.findOne(+id);
