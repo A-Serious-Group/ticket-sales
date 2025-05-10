@@ -24,28 +24,28 @@ services:
       - tickets-network
     depends_on:
       - postgres
-  # api:
-  #   container_name: tickets-api
-  #   build:
-  #     context: ./api
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./api:/usr/src/app
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - tickets-network
-  # front:
-  #   container_name: tickets-front
-  #   build:
-  #     context: ./front
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   networks:
-  #     - tickets-network
-  #   volumes:
-  #     - ./front:/app
+  api:
+    container_name: tickets-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - ./api:/usr/src/app
+    ports:
+      - "3000:3000"
+    networks:
+      - tickets-network
+  front:
+    container_name: tickets-front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - tickets-network
+    volumes:
+      - ./front:/app
 networks:
   tickets-network:
     name: tickets-network
